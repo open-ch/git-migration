@@ -1,0 +1,52 @@
+#!/usr/bin/perl
+# From https://stackoverflow.com/a/223890 by Aristotle Pagaltzis
+use 5.008;
+use strict;
+use Memoize;
+
+my $obj_name;
+
+sub check_tree {
+    my ( $tree ) = @_;
+    my @subtree;
+
+    {
+        open my $ls_tree, '-|', git => 'ls-tree' => $tree
+            or die "Couldn't open pipe to git-ls-tree: $!\n";
+
+        while ( <$ls_tree> ) {
+            /\A[0-7]{6} (\S+) (\S+)/
+                or die "unexpected git-ls-tree output";
+            return 1 if $2 eq $obj_name;
+            push @subtree, $2 if $1 eq 'tree';
+        }
+    }
+
+    check_tree( $_ ) && return 1 for @subtree;
+
+    return;
+}
+
+memoize 'check_tree';
+
+die "usage: git-find-blob <repo_path> <blob> [<git-log arguments ...>]\n"
+    if @ARGV < 2;
+
+my $repo_path = shift @ARGV;
+chdir $repo_path or die "cannot change directory to $repo_path\n";
+
+my $obj_short = shift @ARGV;
+$obj_name = do {
+    local $ENV{'OBJ_NAME'} = $obj_short;
+     `git rev-parse --verify \$OBJ_NAME`;
+} or die "Couldn't parse $obj_short: $!\n";
+chomp $obj_name;
+
+open my $log, '-|', git => log => @ARGV, '--pretty=format:%T %h %s'
+    or die "Couldn't open pipe to git-log: $!\n";
+
+while ( <$log> ) {
+    chomp;
+    my ( $tree, $commit, $subject ) = split " ", $_, 3;
+    print "$commit $subject\n" if check_tree( $tree );
+}
