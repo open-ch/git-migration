@@ -8,7 +8,7 @@ The expectation is that some clean up might be on on the incoming repository so 
 is iterative and can be done locally avoiding destructive side effects on the source and target while
 working on any necessary cleanup or tests.
 
-Migratin a repository is intended to take place in roughly 3 steps:
+Migrating a repository is intended to take place in roughly 3 steps:
 1. Do non destructive and dry-run migrations of the source repository
 2. Review migration results
 3. Re-run a fresh migration (if needed) and apply the changes to the remote targed
@@ -24,14 +24,14 @@ strategy and doing some clean up if needed.
 
 First find out which branch is the trunk/latest branch, on older repositories there can
 be surprises where a release branch is a head of main or develop is behind main. Avoid
-surprises by carfuly choosing which branch to migrate.
+surprises by carefuly choosing which branch to migrate.
 
-Second review the history, are there a lot of commits, are the commit messages meaningful. Is
-the history worth migrating or is the squash stratagy good enough to only get the code.
+Second review the history. Are there a lot of commits? Are the commit messages meaningful? Is
+the history worth migrating or is the squash stratagy good enough to only get the code?
 
 Third comes the cleanup:
-- Remove large files (accidental commits of binaries in the history)
-- Remove/flatten sub modules (including in history)
+- Remove large files (accidental commits of binaries in the history e.g.)
+- Remove/flatten sub-modules (including in history)
 
 Optionally depending on the size of the repository and desire to migrate history, more clean up
 can be done to test history linearization or manualy clean up poor commits ("Fix", "Fix Fix").
@@ -54,9 +54,9 @@ disabled the option again after migrating.
 
 Our initial migrations happened using Phabricator as a remote repository/code host
 it's similar to Sapling SCM. The structure was exotic in that:
-* repo-staging.git stored all the working branches
-* repo.git stored only the trunk branch
-* heavy pre-push/pre-merge restrictions were enforced on the server
+* repo-staging.git stored all the working branches,
+* repo.git stored only the trunk branch,
+* heavy pre-push/pre-merge restrictions were enforced on the server.
 
 **Rebasing on a migration branch usually lead to a mess**. Therefore our proces on that
 setup was to block all merges to trunk for all but the 1-2 contributors migrating. Disable the
@@ -109,7 +109,7 @@ The following are helpful to locate large files before a migration:
 
 - [./git-check-filesizes.sh](./git-check-filesizes.sh) – Checks for files/blobs too large to import
     - To run with a custom size `MAX_SIZE_KB=15625 ./git-check-filesizes.sh <repo_path>` (default: 1024kb)
-- [./git-find-blob.pm](./git-find-blob.pm) – Helper to identify which commits these file blobs are from.
+- [./git-find-blob.pm](./git-find-blob.pm) – Helper to identify which commits these file-blobs are from.
     - Uses the blobs detected by the above script: `./git-find-blob.pm <repo_path> <blob>`
 
 To remove large files [bfg-repo-cleaner](https://rtyley.github.io/bfg-repo-cleaner/) with
@@ -118,17 +118,17 @@ is an effective option if a simple cleanup is possible.
 If you need to remove some but keep others and bfg isn't advanced enough you can look into
 [git-filter-branch](https://git-scm.com/docs/git-filter-branch).
 
-If there are submodules in the repository or in the git history, this will cause
-most git hosts to throw filesize errors in case filesize restrictions are in place.
-In order to fix this, the submodules will need to be removed from the repository and
+If there are sub-modules in the repository or in the git history, this will cause
+most git hosts to throw file size errors in case file size restrictions are in place.
+In order to fix this, the sub-modules will need to be removed from the repository and
 its history. An automated way of going about this is with `git-filter-branch`. The
 command would go through the entire history commit by commit and remove any mention
-of submodules in the repository.
+of sub-modules in the repository.
 
 In order to anticipate this kind of problem, the git log can be searched in advance
-for the use of submodules using `git log -p | grep --after-context=3 Subproject`
+for the use of sub-modules using `git log -p | grep --after-context=3 Subproject`
 
-If any submodules are found the following snippet should help you get rid of them.
+If any sub-modules are found the following snippet should help you get rid of them.
 ```bash
 export SUBMOD_PATH='path/to/submodules'
 ```
