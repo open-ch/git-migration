@@ -90,8 +90,8 @@ export TARGET_TRUNK_BRANCH=develop                       # Optional defaults to 
 
 # This will create a migration/project_name branch on the destination repository
 git-migration/import-repo.sh $SOURCE_REPO_PATH $TARGET_PATH
-# Check info and confirm
-# Select 2 – patch migration strategy
+# Check info and confirm, for example:
+# Select 3 – remote sub tree with linearisation
 
 # If you need to start again and want to delete the branches locally
 git branch -D migration/project_name
