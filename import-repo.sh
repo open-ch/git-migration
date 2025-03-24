@@ -168,7 +168,7 @@ requestConfirmation() {
 }
 
 importStrategyRemoteBranchSubtree() {
-    local git_filter_repo_opts=()
+    local git_filter_repo_force=""
     local rc=0
     echo "Starting remote branch subtree migration strategy"
 
@@ -180,12 +180,12 @@ importStrategyRemoteBranchSubtree() {
     echo "Creating a branch in $SOURCE_REPO_NAME and moving code to $TARGET_SUB_PATH"
     export SOURCE_COMPARE_PATH="$SOURCE_REPO_PATH/$TARGET_SUB_PATH"
     if [ "$GIT_FILTER_REPO_FORCE" -eq 1 ]; then
-         git_filter_repo_opts=( '--force' )
+         git_filter_repo_force='--force'
     fi
     pushd "$SOURCE_REPO_PATH"
         if [ ! -d "$SOURCE_REPO_PATH/$TARGET_SUB_PATH" ]; then
             echo "Running git-filter-repo to rewrite history into $TARGET_SUB_PATH"
-            git filter-repo "${git_filter_repo_opts[@]-}" --to-subdirectory-filter "$TARGET_SUB_PATH" || rc=$?
+            git filter-repo ${git_filter_repo_force} --to-subdirectory-filter "$TARGET_SUB_PATH" || rc=$?
             if [ "$rc" -ne 0 ]; then
                 echo "Note: when git-filter-repo fails because source repo is not 'clean' you can set"
                 echo "      GIT_FILTER_REPO_FORCE=1 and rerun the migration, this will add the '--force'"
